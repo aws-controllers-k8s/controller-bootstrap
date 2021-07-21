@@ -1,0 +1,8 @@
+service:
+  full_name: "" # e.g. Amazon Elastic Kubernetes Service
+  short_name: "" # e.g. EKS
+  link: "" # e.g. https://aws.amazon.com/eks/
+  documentation: "" # Find the link to the "Developer Guide" for the service from https://docs.aws.amazon.com/
+api_versions:
+  - api_version: v1alpha1
+    status: available
