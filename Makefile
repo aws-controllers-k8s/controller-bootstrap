@@ -27,10 +27,10 @@ build:
 	@go build ${GO_CMD_FLAGS} -o ${CONTROLLER_BOOTSTRAP} ./cmd/controller-bootstrap/*.go
 
 generate: build
-	@${CONTROLLER_BOOTSTRAP} generate -r ${ACK_RUNTIME_VERSION} -v ${AWS_SDK_GO_VERSION} -s ${AWS_SERVICE} -d=${DRY_RUN} -o ${ROOT_DIR}/../${AWS_SERVICE}-controller -m ${SERVICE_MODEL_NAME}
+	@${CONTROLLER_BOOTSTRAP} generate -s ${AWS_SERVICE} -r ${ACK_RUNTIME_VERSION} -v ${AWS_SDK_GO_VERSION} -d=${DRY_RUN} -o ${ROOT_DIR}/../${AWS_SERVICE}-controller -m ${SERVICE_MODEL_NAME}
 
 update: build
-	@${CONTROLLER_BOOTSTRAP} generate -r ${ACK_RUNTIME_VERSION} -v ${AWS_SDK_GO_VERSION} -s ${AWS_SERVICE} -d=${DRY_RUN} -e=${EXISTING_CONTROLLER} -o ${ROOT_DIR}/../${AWS_SERVICE}-controller -m ${SERVICE_MODEL_NAME}
+	@${CONTROLLER_BOOTSTRAP} generate -s ${AWS_SERVICE} -r ${ACK_RUNTIME_VERSION} -v ${AWS_SDK_GO_VERSION} -d=${DRY_RUN} -e=${EXISTING_CONTROLLER} -o ${ROOT_DIR}/../${AWS_SERVICE}-controller -m ${SERVICE_MODEL_NAME}
 
 init: generate
 	@export SERVICE=${AWS_SERVICE}
