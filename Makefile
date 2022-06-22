@@ -21,10 +21,7 @@ ACK_RUNTIME_VERSION=$(shell curl -H "Accept: application/vnd.github.v3+json" \
 
 .DEFAULT_GOAL=run
 DRY_RUN="false"
-EXISTING_CONTROLLER="true"
-ifeq ($(CONTROLLER_DIR/cmd/controller/main.go),)
-	EXISTING_CONTROLLER="false"
-endif
+EXISTING_CONTROLLER="false"
 
 # Build ldflags
 VERSION ?= "v0.0.0"
@@ -57,6 +54,7 @@ init: generate
 
 run:
 	@if [ -f ${CONTROLLER_DIR}/cmd/controller/main.go ]; then \
+  	  	EXISTING_CONTROLLER="true"; \
 	    make generate; \
 	else \
 	    make init; \
