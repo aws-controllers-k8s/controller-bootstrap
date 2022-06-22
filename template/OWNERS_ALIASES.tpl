@@ -6,5 +6,5 @@ aliases:
     - a-hilaly
     - RedbackThomson
     - vijtrip2
-  # TODO: Add your team members to your team controller alias
+  # TODO: Add your team members' GitHub aliases to the team alias
   service-team: []

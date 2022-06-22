@@ -1,8 +1,8 @@
 service:
-  full_name: "{{ .ServiceFullName }}"
-  short_name: "{{ .ServiceID }}"
+  full_name:
+  short_name:
   link:
   documentation:
 api_versions:
-  - api_version:
-    status:
+  - api_version: v1alpha1
+    status: available

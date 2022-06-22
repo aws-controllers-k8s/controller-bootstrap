@@ -1,1 +1,1 @@
-This is README.md for test directory
+test directory contains the python e2e tests for this controller.

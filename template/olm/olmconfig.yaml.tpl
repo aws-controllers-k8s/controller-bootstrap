@@ -27,8 +27,8 @@ samples:
 - kind: SecondExampleCustomKind
   spec: '{}'
 maintainers:
-- name: "Your Team Name"
-  email: "your-team@example.com"
+- name: "{{ .ServicePackageName }} maintainer team"
+  email: "ack-maintainers@amazon.com"
 links:
 - name: Amazon {{ .ServiceID }} Developer Resources
   url: "{YOUR SERVICE DEVELOPER RESOURCES URL}"

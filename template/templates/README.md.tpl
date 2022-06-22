@@ -1,1 +1,1 @@
-This is README.md for templates directory
+templates directory is used to provide custom hook code templates.
