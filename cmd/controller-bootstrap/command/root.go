@@ -44,7 +44,7 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	rootCmd.PersistentFlags().StringVarP(
-		&optServiceAlias, "aws-service-alias", "s", "", "Supplied AWS service alias",
+		&optServiceAlias, "aws-service-alias", "s", "", "AWS service alias",
 	)
 	rootCmd.PersistentFlags().StringVarP(
 		&optRuntimeVersion, "ack-runtime-version", "r", "", "Version of aws-controllers-k8s/runtime",
@@ -56,13 +56,13 @@ func init() {
 		&optDryRun, "dry-run", "d", false, "Optional: if true, output files to stdout",
 	)
 	rootCmd.PersistentFlags().BoolVarP(
-		&optExistingController, "existing-service-controller", "e", false, "Optional: if true, update the existing service controller",
+		&optExistingController, "existing-controller", "e", false, "Optional: if true, update the existing service controller",
 	)
 	rootCmd.PersistentFlags().StringVarP(
 		&optOutputPath, "output", "o", "", "Path to ACK service controller directory to bootstrap",
 	)
 	rootCmd.PersistentFlags().StringVarP(
-		&optModelName, "service-model-name", "m", "", "Optional: service model name of the supplied service alias",
+		&optModelName, "model-name", "m", "", "Optional: service model name of the corresponding service alias",
 	)
 	rootCmd.MarkPersistentFlagRequired("aws-service-alias")
 	rootCmd.MarkPersistentFlagRequired("ack-runtime-version")

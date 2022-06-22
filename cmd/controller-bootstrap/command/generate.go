@@ -20,10 +20,13 @@ import (
 var templateCmd = &cobra.Command{
 	Use:   "generate",
 	Short: "generate template files in an ACK service controller repository",
-	RunE:  generateTemplates,
+	RunE:  generateController,
 }
 
-// todo: generateTemplates renders the template files and directories in an ACK service controller repository
-func generateTemplates(cmd *cobra.Command, args []string) error {
+// TODO: generateController creates the initial directories and files for a service controller
+// repository by rendering go template files.
+// When a controller is already existing, then this method only updates the project
+// description files.
+func generateController(cmd *cobra.Command, args []string) error {
 	return nil
 }

@@ -13,7 +13,7 @@
 
 package command
 
-// todo: getServiceResources infers aws-sdk-go to fetch the service metadata and custom resource names
+// TODO: getServiceResources infers aws-sdk-go to fetch the service metadata and custom resource names
 func getServiceResources() error {
 	return nil
 }
