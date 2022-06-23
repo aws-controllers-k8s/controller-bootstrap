@@ -12,3 +12,28 @@
 # permissions and limitations under the License.
 """Bootstraps the resources required to run the {{ .ServiceID }} integration tests.
 """
+import logging
+
+from acktest.bootstrapping import Resources, BootstrapFailureException
+
+from e2e import bootstrap_directory
+from e2e.bootstrap_resources import BootstrapResources
+
+def service_bootstrap() -> Resources:
+    logging.getLogger().setLevel(logging.INFO)
+
+    resources = BootstrapResources(
+        # TODO: Add bootstrapping when you have defined the resources
+    )
+
+    try:
+        resources.bootstrap()
+    except BootstrapFailureException as ex:
+        exit(254)
+
+    return resources
+
+if __name__ == "__main__":
+    config = service_bootstrap()
+    # Write config to current directory by default
+    config.serialize(bootstrap_directory)

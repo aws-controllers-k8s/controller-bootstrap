@@ -18,6 +18,8 @@ AWS_SDK_GO_VERSION=$(shell curl -H "Accept: application/vnd.github.v3+json" \
     https://api.github.com/repos/aws/aws-sdk-go/releases/latest | jq -r '.tag_name')
 ACK_RUNTIME_VERSION=$(shell curl -H "Accept: application/vnd.github.v3+json" \
     https://api.github.com/repos/aws-controllers-k8s/runtime/releases/latest | jq -r '.tag_name')
+TEST_INFRA_HEAD_COMMIT_SHA=$(shell curl -H "Accept: application/vnd.github.v3+json" \
+    https://api.github.com/repos/aws-controllers-k8s/test-infra/commits | jq -r ".[0].sha")
 
 .DEFAULT_GOAL=run
 DRY_RUN="false"
@@ -41,7 +43,8 @@ build:
 	@go build ${GO_CMD_FLAGS} -o ${CONTROLLER_BOOTSTRAP} ./cmd/controller-bootstrap/main.go
 
 generate: build
-	@${CONTROLLER_BOOTSTRAP} generate -s ${AWS_SERVICE} -r ${ACK_RUNTIME_VERSION} -v ${AWS_SDK_GO_VERSION} -d=${DRY_RUN} -e=${EXISTING_CONTROLLER} -o ${ROOT_DIR}/../${AWS_SERVICE}-controller -m ${SERVICE_MODEL_NAME}
+	@${CONTROLLER_BOOTSTRAP} generate -s ${AWS_SERVICE} -r ${ACK_RUNTIME_VERSION} -v ${AWS_SDK_GO_VERSION} -d=${DRY_RUN} \
+    -e=${EXISTING_CONTROLLER} -o ${ROOT_DIR}/../${AWS_SERVICE}-controller -m ${SERVICE_MODEL_NAME} -c ${TEST_INFRA_HEAD_COMMIT_SHA}
 
 init: generate
 	@export SERVICE=${AWS_SERVICE}

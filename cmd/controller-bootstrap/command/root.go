@@ -33,6 +33,7 @@ var (
 	optExistingController bool
 	optOutputPath         string
 	optModelName          string
+	optTestInfraCommitSHA string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -64,10 +65,14 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(
 		&optModelName, "model-name", "m", "", "Optional: service model name of the corresponding service alias",
 	)
+	rootCmd.PersistentFlags().StringVarP(
+		&optTestInfraCommitSHA, "test-infra-head-commit-sha", "c", "", "Head commit SHA of aws-controllers-k8s/test-infra",
+	)
 	rootCmd.MarkPersistentFlagRequired("aws-service-alias")
 	rootCmd.MarkPersistentFlagRequired("ack-runtime-version")
 	rootCmd.MarkPersistentFlagRequired("aws-sdk-go-version")
 	rootCmd.MarkPersistentFlagRequired("output")
+	rootCmd.MarkPersistentFlagRequired("test-infra-head-commit-sha")
 	rootCmd.AddCommand(templateCmd)
 }
 

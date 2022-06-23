@@ -26,3 +26,9 @@ service_marker = pytest.mark.service(arg=SERVICE_NAME)
 
 bootstrap_directory = Path(__file__).parent
 resource_directory = Path(__file__).parent / "resources"
+
+def load_{{ .ServicePackageName }}_resource(resource_name: str, additional_replacements: Dict[str, Any] = {}):
+    """ Overrides the default `load_resource_file` to access the specific resources
+    directory for the current service.
+    """
+    return load_resource_file(resource_directory, resource_name, additional_replacements=additional_replacements)
