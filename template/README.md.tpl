@@ -1,7 +1,7 @@
-# ACK service controller for {{ .Service.Description }} ({{ .Service.Name.Upper }})
+# ACK service controller for {{ .ServiceFullName }}
 
 This repository contains source code for the AWS Controllers for Kubernetes
-(ACK) service controller for {{ .Service.Description }} ({{ .Service.Name.Upper }}).
+(ACK) service controller for {{ .ServiceAbbreviation }}.
 
 Please [log issues][ack-issues] and feedback on the main AWS Controllers for
 Kubernetes Github project.
