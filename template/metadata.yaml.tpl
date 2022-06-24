@@ -1,6 +1,6 @@
 service:
-  full_name: "{{ .ServiceFullName }}" [Update Accordingly]
-  short_name: "{{ .ServiceID }}" [Update Accordingly]
+  full_name:
+  short_name:
   link:
   documentation:
 api_versions:
