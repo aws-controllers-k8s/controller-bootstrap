@@ -30,7 +30,6 @@ var (
 	optRuntimeVersion     string
 	optAWSSDKGoVersion    string
 	optDryRun             bool
-	optExistingController bool
 	optOutputPath         string
 	optModelName          string
 	optTestInfraCommitSHA string
@@ -56,11 +55,8 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(
 		&optDryRun, "dry-run", false, "Optional: if true, output files to stdout",
 	)
-	rootCmd.PersistentFlags().BoolVar(
-		&optExistingController, "existing-controller", false, "Optional: if true, update the existing service controller",
-	)
 	rootCmd.PersistentFlags().StringVar(
-		&optOutputPath, "output", "", "Path to ACK service controller directory to bootstrap",
+		&optOutputPath, "output-path", "", "Path to ACK service controller directory to bootstrap",
 	)
 	rootCmd.PersistentFlags().StringVar(
 		&optModelName, "model-name", "", "Optional: service model name of the corresponding service alias",
@@ -71,7 +67,7 @@ func init() {
 	rootCmd.MarkPersistentFlagRequired("aws-service-alias")
 	rootCmd.MarkPersistentFlagRequired("ack-runtime-version")
 	rootCmd.MarkPersistentFlagRequired("aws-sdk-go-version")
-	rootCmd.MarkPersistentFlagRequired("output")
+	rootCmd.MarkPersistentFlagRequired("output-path")
 	rootCmd.MarkPersistentFlagRequired("test-infra-commit-sha")
 	rootCmd.AddCommand(templateCmd)
 }

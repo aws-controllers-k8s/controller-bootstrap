@@ -23,7 +23,6 @@ TEST_INFRA_COMMIT_SHA=$(shell curl -H "Accept: application/vnd.github.v3+json" \
 
 .DEFAULT_GOAL=run
 DRY_RUN="false"
-EXISTING_CONTROLLER="false"
 
 # Build ldflags
 VERSION ?= "v0.0.0"
@@ -44,8 +43,8 @@ build:
 
 generate: build
 	@${CONTROLLER_BOOTSTRAP} generate --aws-service-alias ${AWS_SERVICE} --ack-runtime-version ${ACK_RUNTIME_VERSION} \
-    --aws-sdk-go-version ${AWS_SDK_GO_VERSION} --dry-run=${DRY_RUN} --existing-controller=${EXISTING_CONTROLLER} \
-    --output ${ROOT_DIR}/../${AWS_SERVICE}-controller --model-name ${SERVICE_MODEL_NAME} --test-infra-commit-sha ${TEST_INFRA_COMMIT_SHA}
+    --aws-sdk-go-version ${AWS_SDK_GO_VERSION} --dry-run=${DRY_RUN} --output-path ${ROOT_DIR}/../${AWS_SERVICE}-controller \
+    --model-name ${SERVICE_MODEL_NAME} --test-infra-commit-sha ${TEST_INFRA_COMMIT_SHA}
 
 init: generate
 	@export SERVICE=${AWS_SERVICE}
@@ -58,7 +57,6 @@ init: generate
 
 run:
 	@if [ -f ${CONTROLLER_DIR}/cmd/controller/main.go ]; then \
-  	  	EXISTING_CONTROLLER="true"; \
 	    make generate; \
 	else \
 	    make init; \
