@@ -23,6 +23,7 @@ TEST_INFRA_COMMIT_SHA=$(shell curl -H "Accept: application/vnd.github.v3+json" \
 
 .DEFAULT_GOAL=run
 DRY_RUN="false"
+REFRESH_CACHE="true"
 
 # Build ldflags
 VERSION ?= "v0.0.0"
@@ -44,7 +45,7 @@ build:
 generate: build
 	@${CONTROLLER_BOOTSTRAP} generate --aws-service-alias ${AWS_SERVICE} --ack-runtime-version ${ACK_RUNTIME_VERSION} \
     --aws-sdk-go-version ${AWS_SDK_GO_VERSION} --dry-run=${DRY_RUN} --output-path ${ROOT_DIR}/../${AWS_SERVICE}-controller \
-    --model-name ${SERVICE_MODEL_NAME} --test-infra-commit-sha ${TEST_INFRA_COMMIT_SHA}
+    --model-name ${SERVICE_MODEL_NAME} --refresh-cache=${REFRESH_CACHE} --test-infra-commit-sha ${TEST_INFRA_COMMIT_SHA}
 
 init: generate
 	@export SERVICE=${AWS_SERVICE}
@@ -53,7 +54,7 @@ init: generate
 	@cd ${CODE_GEN_DIR} && make -i build-controller >/dev/null 2>/dev/null
 	@cd ${CONTROLLER_DIR} && go mod tidy
 	@cd ${CODE_GEN_DIR} && make build-controller
-	@echo "${AWS_SERVICE}-controller generated successfully, look inside ${AWS_SERVICE}-controller/INSTRUCTIONS.md for further instructions"
+	@echo "${AWS_SERVICE}-controller generated successfully, look inside ${AWS_SERVICE}-controller/READ_BEFORE_COMMIT.md for further instructions"
 
 run:
 	@if [ -f ${CONTROLLER_DIR}/cmd/controller/main.go ]; then \
