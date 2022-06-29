@@ -51,7 +51,6 @@ generate: build
     --model-name ${SERVICE_MODEL_NAME} --test-infra-commit-sha ${TEST_INFRA_COMMIT_SHA}
 
 init: generate
-	@export SERVICE=${AWS_SERVICE}
 	@cd ${CODE_GEN_DIR} && make -i build-controller >/dev/null 2>/dev/null
 	@cd ${CONTROLLER_DIR} && go mod tidy
 	@cd ${CODE_GEN_DIR} && make -i build-controller >/dev/null 2>/dev/null
