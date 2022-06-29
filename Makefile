@@ -45,12 +45,12 @@ build:
 	@go build ${GO_CMD_FLAGS} -o ${CONTROLLER_BOOTSTRAP} ./cmd/controller-bootstrap/main.go
 
 generate: build
-	echo "print this ${ACK_RUNTIME_VERSION}"
 	@${CONTROLLER_BOOTSTRAP} generate --aws-service-alias ${AWS_SERVICE} --ack-runtime-version ${ACK_RUNTIME_VERSION} \
     --aws-sdk-go-version ${AWS_SDK_GO_VERSION} --dry-run=${DRY_RUN} --output-path ${ROOT_DIR}/../${AWS_SERVICE}-controller \
     --model-name ${SERVICE_MODEL_NAME} --test-infra-commit-sha ${TEST_INFRA_COMMIT_SHA}
 
 init: generate
+	@export SERVICE=${AWS_SERVICE}
 	@cd ${CODE_GEN_DIR} && make -i build-controller >/dev/null 2>/dev/null
 	@cd ${CONTROLLER_DIR} && go mod tidy
 	@cd ${CODE_GEN_DIR} && make -i build-controller >/dev/null 2>/dev/null
