@@ -14,11 +14,11 @@ CONTROLLER_DIR=${ROOT_DIR}/../${AWS_SERVICE}-controller
 CONTROLLER_BOOTSTRAP=./bin/controller-bootstrap
 CODE_GEN_DIR=${ROOT_DIR}/../code-generator
 
-ACK_RUNTIME_VERSION=$(or $(shell echo $(RUNTIME_VERSION)),$(shell curl -H "Accept: application/vnd.github.v3+json" \
+ACK_RUNTIME_VERSION=$(or $(shell echo $(ACK_RUNTIME_VERSION)),$(shell curl -H "Accept: application/vnd.github.v3+json" \
     https://api.github.com/repos/aws-controllers-k8s/runtime/releases/latest | jq -r '.tag_name'))
-AWS_SDK_GO_VERSION=$(or $(shell echo $(SDK_VERSION)),$(shell curl -H "Accept: application/vnd.github.v3+json" \
+AWS_SDK_GO_VERSION=$(or $(shell echo $(AWS_SDK_GO_VERSION)),$(shell curl -H "Accept: application/vnd.github.v3+json" \
     https://api.github.com/repos/aws/aws-sdk-go/releases/latest | jq -r '.tag_name'))
-TEST_INFRA_COMMIT_SHA=$(or $(shell echo $(COMMIT_SHA)),$(shell curl -H "Accept: application/vnd.github.v3+json" \
+TEST_INFRA_COMMIT_SHA=$(or $(shell echo $(TEST_INFRA_COMMIT_SHA)),$(shell curl -H "Accept: application/vnd.github.v3+json" \
     https://api.github.com/repos/aws-controllers-k8s/test-infra/commits | jq -r ".[0].sha"))
 
 .DEFAULT_GOAL=run
