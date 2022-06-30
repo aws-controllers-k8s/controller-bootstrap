@@ -130,7 +130,7 @@ func ensureSDKRepo(
 	}
 
 	// get sdkVersion and ensure its prefix
-	sdkVersion, err := getSDKVersion()
+	sdkVersion := getSDKVersion()
 	if err != nil {
 		return err
 	}
@@ -160,10 +160,6 @@ func ensureSemverPrefix(s string) string {
 
 // getSDKVersion returns the github.com/aws/aws-sdk-go version to use
 // from the --aws-sdk-go-version flag.
-func getSDKVersion() (string, error) {
-	// try to get the version from --aws-sdk-go-version flag
-	if optAWSSDKGoVersion != "" {
-		return optAWSSDKGoVersion, nil
-	}
-	return "", fmt.Errorf("couldn't find aws-sdk-go version")
+func getSDKVersion() string {
+	return optAWSSDKGoVersion
 }

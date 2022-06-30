@@ -44,6 +44,9 @@ var templateCmd = &cobra.Command{
 // TODO: When a controller is already existing, then this method only updates the project
 // description files.
 func generateController(cmd *cobra.Command, args []string) error {
+	if err := validateRequiredOptions(); err != nil {
+		return err
+	}
 	ctx, cancel := contextWithSigterm(context.Background())
 	defer cancel()
 	if err := ensureSDKRepo(ctx, defaultCacheACKDir, optRefreshCache); err != nil {
@@ -70,6 +73,25 @@ func generateController(cmd *cobra.Command, args []string) error {
 	err = renderTemplateFiles(tplPaths, tplVars)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func validateRequiredOptions() error {
+	if optServiceAlias == "" {
+		return fmt.Errorf("please specify the AWS service alias for the service controller to generate")
+	}
+	if optRuntimeVersion == "" {
+		return fmt.Errorf("please specify the aws-controllers-k8s/runtime version to generate the service controller")
+	}
+	if optAWSSDKGoVersion == "" {
+		return fmt.Errorf("please specify the aws-sdk-go version to generate the service controller")
+	}
+	if optOutputPath == "" {
+		return fmt.Errorf("please specify the output path to generate the service controller")
+	}
+	if optTestInfraCommitSHA == "" {
+		return fmt.Errorf("please specify the aws-controllers-k8s/test-infra commit SHA to generate the service controller")
 	}
 	return nil
 }
