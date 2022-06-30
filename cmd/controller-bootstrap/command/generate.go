@@ -44,7 +44,7 @@ var templateCmd = &cobra.Command{
 // TODO: When a controller is already existing, then this method only updates the project
 // description files.
 func generateController(cmd *cobra.Command, args []string) error {
-	if err := validateRequiredOptions(); err != nil {
+	if err := validateArgs(); err != nil {
 		return err
 	}
 	ctx, cancel := contextWithSigterm(context.Background())
@@ -77,7 +77,7 @@ func generateController(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func validateRequiredOptions() error {
+func validateArgs() error {
 	if optServiceAlias == "" {
 		return fmt.Errorf("please specify the AWS service alias for the service controller to generate")
 	}
