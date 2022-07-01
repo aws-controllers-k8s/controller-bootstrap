@@ -16,6 +16,7 @@ package command
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
@@ -33,6 +34,10 @@ var (
 	optOutputPath         string
 	optModelName          string
 	optTestInfraCommitSHA string
+	sdkDir                string
+	defaultCacheACKDir    string
+	optRefreshCache       bool
+	defaultTemplatesDir   string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -43,6 +48,20 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
+	hd, err := os.UserHomeDir()
+	if err != nil {
+		fmt.Printf("unable to determine $HOME: %s\n", err)
+		os.Exit(1)
+	}
+	defaultCacheACKDir = filepath.Join(hd, ".cache", "aws-controllers-k8s")
+
+	cd, err := os.Getwd()
+	if err != nil {
+		fmt.Printf("unable to determine current working directory: %s\n", err)
+		os.Exit(1)
+	}
+	defaultTemplatesDir = filepath.Join(cd, "templates")
+
 	rootCmd.PersistentFlags().StringVar(
 		&optServiceAlias, "aws-service-alias", "", "AWS service alias",
 	)
@@ -60,6 +79,9 @@ func init() {
 	)
 	rootCmd.PersistentFlags().StringVar(
 		&optModelName, "model-name", "", "Optional: service model name of the corresponding service alias",
+	)
+	rootCmd.PersistentFlags().BoolVar(
+		&optRefreshCache, "refresh-cache", true, "Optional: if true, and aws-sdk-go repo is already cloned, will git pull the latest aws-sdk-go commit",
 	)
 	rootCmd.PersistentFlags().StringVar(
 		&optTestInfraCommitSHA, "test-infra-commit-sha", "", "Commit SHA of aws-controllers-k8s/test-infra",
