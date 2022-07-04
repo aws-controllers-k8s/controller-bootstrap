@@ -33,6 +33,13 @@ const (
 	defaultGitFetchTimeout = 30 * time.Second
 )
 
+// controllerExists returns True if the service controller already exists, false otherwise
+func controllerExists() bool {
+	file := filepath.Join(optOutputPath, "cmd", "controller", "main.go")
+	_, err := os.Stat(file)
+	return !os.IsNotExist(err)
+}
+
 func contextWithSigterm(ctx context.Context) (context.Context, context.CancelFunc) {
 	ctx, cancel := context.WithCancel(ctx)
 	signalCh := make(chan os.Signal, 1)

@@ -27,16 +27,16 @@ const (
 )
 
 var (
-	optServiceAlias       string
 	optRuntimeVersion     string
 	optAWSSDKGoVersion    string
+	optTestInfraCommitSHA string
+	optModelName          string
+	optRefreshCache       bool
+	optServiceAlias       string
 	optDryRun             bool
 	optOutputPath         string
-	optModelName          string
-	optTestInfraCommitSHA string
 	sdkDir                string
 	defaultCacheACKDir    string
-	optRefreshCache       bool
 	defaultTemplatesDir   string
 )
 
@@ -62,14 +62,23 @@ func init() {
 	}
 	defaultTemplatesDir = filepath.Join(cd, "templates")
 
-	rootCmd.PersistentFlags().StringVar(
-		&optServiceAlias, "aws-service-alias", "", "AWS service alias",
-	)
-	rootCmd.PersistentFlags().StringVar(
+	templateCmd.PersistentFlags().StringVar(
 		&optRuntimeVersion, "ack-runtime-version", "", "Version of aws-controllers-k8s/runtime",
 	)
-	rootCmd.PersistentFlags().StringVar(
+	templateCmd.PersistentFlags().StringVar(
 		&optAWSSDKGoVersion, "aws-sdk-go-version", "", "Version of github.com/aws/aws-sdk-go used to infer service metadata and resources",
+	)
+	templateCmd.PersistentFlags().StringVar(
+		&optTestInfraCommitSHA, "test-infra-commit-sha", "", "Commit SHA of aws-controllers-k8s/test-infra",
+	)
+	templateCmd.PersistentFlags().StringVar(
+		&optModelName, "model-name", "", "Optional: service model name of the corresponding service alias",
+	)
+	templateCmd.PersistentFlags().BoolVar(
+		&optRefreshCache, "refresh-cache", true, "Optional: if true, and aws-sdk-go repo is already cloned, will git pull the latest aws-sdk-go commit",
+	)
+	rootCmd.PersistentFlags().StringVar(
+		&optServiceAlias, "aws-service-alias", "", "AWS service alias",
 	)
 	rootCmd.PersistentFlags().BoolVar(
 		&optDryRun, "dry-run", false, "Optional: if true, output files to stdout",
@@ -77,21 +86,13 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(
 		&optOutputPath, "output-path", "", "Path to ACK service controller directory to bootstrap",
 	)
-	rootCmd.PersistentFlags().StringVar(
-		&optModelName, "model-name", "", "Optional: service model name of the corresponding service alias",
-	)
-	rootCmd.PersistentFlags().BoolVar(
-		&optRefreshCache, "refresh-cache", true, "Optional: if true, and aws-sdk-go repo is already cloned, will git pull the latest aws-sdk-go commit",
-	)
-	rootCmd.PersistentFlags().StringVar(
-		&optTestInfraCommitSHA, "test-infra-commit-sha", "", "Commit SHA of aws-controllers-k8s/test-infra",
-	)
+	templateCmd.MarkPersistentFlagRequired("ack-runtime-version")
+	templateCmd.MarkPersistentFlagRequired("aws-sdk-go-version")
+	templateCmd.MarkPersistentFlagRequired("test-infra-commit-sha")
 	rootCmd.MarkPersistentFlagRequired("aws-service-alias")
-	rootCmd.MarkPersistentFlagRequired("ack-runtime-version")
-	rootCmd.MarkPersistentFlagRequired("aws-sdk-go-version")
 	rootCmd.MarkPersistentFlagRequired("output-path")
-	rootCmd.MarkPersistentFlagRequired("test-infra-commit-sha")
 	rootCmd.AddCommand(templateCmd)
+	rootCmd.AddCommand(updateCmd)
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

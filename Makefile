@@ -58,7 +58,8 @@ init: generate
 
 run:
 	@if [ -f ${CONTROLLER_DIR}/cmd/controller/main.go ]; then \
-	    make generate; \
+        make build; \
+        ${CONTROLLER_BOOTSTRAP} update --aws-service-alias ${AWS_SERVICE} --output-path ${ROOT_DIR}/../${AWS_SERVICE}-controller; \
 	else \
 	    make init; \
 	fi
