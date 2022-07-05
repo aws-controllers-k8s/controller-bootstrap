@@ -35,20 +35,16 @@ type templateVars struct {
 }
 
 var (
+	awsSDKGoVersion               string
+	ErrMissingGenerateCommandArgs = errors.New(
+		"please specify the aws-sdk-go version, aws-controllers-k8s/runtime version and " +
+			"aws-controllers-k8s/test-infra commit SHA to generate the service controller",
+	)
 	ErrServiceAliasNotFound = errors.New(
 		"please specify the AWS service alias for the service controller to generate",
 	)
-	ErrRuntimeVersionNotFound = errors.New(
-		"please specify the aws-controllers-k8s/runtime version to generate the service controller",
-	)
-	ErrAWSSDKGoVersionNotFound = errors.New(
-		"please specify the aws-sdk-go version to generate the service controller",
-	)
 	ErrOutputPathNotFound = errors.New(
 		"please specify the output path to generate the service controller",
-	)
-	ErrTestInfraCommitShaNotFound = errors.New(
-		"please specify the aws-controllers-k8s/test-infra commit SHA to generate the service controller",
 	)
 	ErrServiceControllerExists = errors.New(
 		"the service controller repository for the supplied AWS service alias already exists, please run the update command for an existing controller",
@@ -67,12 +63,21 @@ var templateCmd = &cobra.Command{
 // generateController creates the initial directories and files for a
 // new service controller repository by rendering go template files.
 func generateController(cmd *cobra.Command, args []string) error {
-	if err := validateArgs(); err != nil {
-		return err
+	if len(args) != 3 {
+		return ErrMissingGenerateCommandArgs
+	}
+	if optServiceAlias == "" {
+		return ErrServiceAliasNotFound
+	}
+	if optOutputPath == "" {
+		return ErrOutputPathNotFound
 	}
 	if controllerExists() {
 		return ErrServiceControllerExists
 	}
+	awsSDKGoVersion = strings.ToLower(args[0])
+	runtimeVersion := strings.ToLower(args[1])
+	testInfraCommitSHA := strings.ToLower(args[2])
 
 	ctx, cancel := contextWithSigterm(context.Background())
 	defer cancel()
@@ -86,9 +91,9 @@ func generateController(cmd *cobra.Command, args []string) error {
 	}
 	tplVars := &templateVars{
 		metaVars:           svcVars,
-		AWSSDKGoVersion:    optAWSSDKGoVersion,
-		RuntimeVersion:     optRuntimeVersion,
-		TestInfraCommitSHA: optTestInfraCommitSHA,
+		AWSSDKGoVersion:    awsSDKGoVersion,
+		RuntimeVersion:     runtimeVersion,
+		TestInfraCommitSHA: testInfraCommitSHA,
 	}
 
 	var tplPaths []string
@@ -100,25 +105,6 @@ func generateController(cmd *cobra.Command, args []string) error {
 	err = renderTemplateFiles(tplPaths, tplVars)
 	if err != nil {
 		return err
-	}
-	return nil
-}
-
-func validateArgs() error {
-	if optServiceAlias == "" {
-		return ErrServiceAliasNotFound
-	}
-	if optRuntimeVersion == "" {
-		return ErrRuntimeVersionNotFound
-	}
-	if optAWSSDKGoVersion == "" {
-		return ErrAWSSDKGoVersionNotFound
-	}
-	if optOutputPath == "" {
-		return ErrOutputPathNotFound
-	}
-	if optTestInfraCommitSHA == "" {
-		return ErrTestInfraCommitShaNotFound
 	}
 	return nil
 }

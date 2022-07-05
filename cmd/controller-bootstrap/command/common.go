@@ -165,8 +165,7 @@ func ensureSemverPrefix(s string) string {
 	return fmt.Sprintf("v%s", s)
 }
 
-// getSDKVersion returns the github.com/aws/aws-sdk-go version to use
-// from the --aws-sdk-go-version flag.
+// getSDKVersion returns the github.com/aws/aws-sdk-go version
 func getSDKVersion() string {
-	return optAWSSDKGoVersion
+	return awsSDKGoVersion
 }

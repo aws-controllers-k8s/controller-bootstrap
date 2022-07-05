@@ -27,17 +27,14 @@ const (
 )
 
 var (
-	optRuntimeVersion     string
-	optAWSSDKGoVersion    string
-	optTestInfraCommitSHA string
-	optModelName          string
-	optRefreshCache       bool
-	optServiceAlias       string
-	optDryRun             bool
-	optOutputPath         string
-	sdkDir                string
-	defaultCacheACKDir    string
-	defaultTemplatesDir   string
+	sdkDir              string
+	defaultCacheACKDir  string
+	defaultTemplatesDir string
+	optModelName        string
+	optRefreshCache     bool
+	optServiceAlias     string
+	optDryRun           bool
+	optOutputPath       string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -63,15 +60,6 @@ func init() {
 	defaultTemplatesDir = filepath.Join(cd, "templates")
 
 	templateCmd.PersistentFlags().StringVar(
-		&optRuntimeVersion, "ack-runtime-version", "", "Version of aws-controllers-k8s/runtime",
-	)
-	templateCmd.PersistentFlags().StringVar(
-		&optAWSSDKGoVersion, "aws-sdk-go-version", "", "Version of github.com/aws/aws-sdk-go used to infer service metadata and resources",
-	)
-	templateCmd.PersistentFlags().StringVar(
-		&optTestInfraCommitSHA, "test-infra-commit-sha", "", "Commit SHA of aws-controllers-k8s/test-infra",
-	)
-	templateCmd.PersistentFlags().StringVar(
 		&optModelName, "model-name", "", "Optional: service model name of the corresponding service alias",
 	)
 	templateCmd.PersistentFlags().BoolVar(
@@ -86,9 +74,6 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(
 		&optOutputPath, "output-path", "", "Path to ACK service controller directory to bootstrap",
 	)
-	templateCmd.MarkPersistentFlagRequired("ack-runtime-version")
-	templateCmd.MarkPersistentFlagRequired("aws-sdk-go-version")
-	templateCmd.MarkPersistentFlagRequired("test-infra-commit-sha")
 	rootCmd.MarkPersistentFlagRequired("aws-service-alias")
 	rootCmd.MarkPersistentFlagRequired("output-path")
 	rootCmd.AddCommand(templateCmd)

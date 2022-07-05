@@ -43,9 +43,9 @@ build:
 	@go build ${GO_CMD_FLAGS} -o ${CONTROLLER_BOOTSTRAP} ./cmd/controller-bootstrap/main.go
 
 generate: build
-	@${CONTROLLER_BOOTSTRAP} generate --aws-service-alias ${AWS_SERVICE} --ack-runtime-version ${ACK_RUNTIME_VERSION} \
-    --aws-sdk-go-version ${AWS_SDK_GO_VERSION} --dry-run=${DRY_RUN} --output-path ${ROOT_DIR}/../${AWS_SERVICE}-controller \
-    --model-name ${SERVICE_MODEL_NAME} --refresh-cache=${REFRESH_CACHE} --test-infra-commit-sha ${TEST_INFRA_COMMIT_SHA}
+	@${CONTROLLER_BOOTSTRAP} generate ${AWS_SDK_GO_VERSION} ${ACK_RUNTIME_VERSION} ${TEST_INFRA_COMMIT_SHA} \
+    --aws-service-alias ${AWS_SERVICE} --dry-run=${DRY_RUN} --output-path ${ROOT_DIR}/../${AWS_SERVICE}-controller \
+    --model-name ${SERVICE_MODEL_NAME} --refresh-cache=${REFRESH_CACHE}
 
 init: generate
 	@export SERVICE=${AWS_SERVICE}
