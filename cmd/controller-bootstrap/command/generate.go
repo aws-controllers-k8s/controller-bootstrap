@@ -16,6 +16,7 @@ package command
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -33,20 +34,46 @@ type templateVars struct {
 	TestInfraCommitSHA string
 }
 
+var (
+	ErrServiceAliasNotFound = errors.New(
+		"please specify the AWS service alias for the service controller to generate",
+	)
+	ErrRuntimeVersionNotFound = errors.New(
+		"please specify the aws-controllers-k8s/runtime version to generate the service controller",
+	)
+	ErrAWSSDKGoVersionNotFound = errors.New(
+		"please specify the aws-sdk-go version to generate the service controller",
+	)
+	ErrOutputPathNotFound = errors.New(
+		"please specify the output path to generate the service controller",
+	)
+	ErrTestInfraCommitShaNotFound = errors.New(
+		"please specify the aws-controllers-k8s/test-infra commit SHA to generate the service controller",
+	)
+	ErrServiceControllerExists = errors.New(
+		"the service controller repository for the supplied AWS service alias already exists, please run the update command for an existing controller",
+	)
+	ErrServiceControllerNotFound = errors.New(
+		"the service controller repository for the supplied AWS service alias does not exist, please run the generate command for a new service controller",
+	)
+)
+
 var templateCmd = &cobra.Command{
 	Use:   "generate",
 	Short: "generate template files in an ACK service controller repository",
 	RunE:  generateController,
 }
 
-// generateController creates the initial directories and files for a service controller
-// repository by rendering go template files.
-// TODO: When a controller is already existing, then this method only updates the project
-// description files.
+// generateController creates the initial directories and files for a
+// new service controller repository by rendering go template files.
 func generateController(cmd *cobra.Command, args []string) error {
 	if err := validateArgs(); err != nil {
 		return err
 	}
+	if controllerExists() {
+		return ErrServiceControllerExists
+	}
+
 	ctx, cancel := contextWithSigterm(context.Background())
 	defer cancel()
 	if err := ensureSDKRepo(ctx, defaultCacheACKDir, optRefreshCache); err != nil {
@@ -79,19 +106,19 @@ func generateController(cmd *cobra.Command, args []string) error {
 
 func validateArgs() error {
 	if optServiceAlias == "" {
-		return fmt.Errorf("please specify the AWS service alias for the service controller to generate")
+		return ErrServiceAliasNotFound
 	}
 	if optRuntimeVersion == "" {
-		return fmt.Errorf("please specify the aws-controllers-k8s/runtime version to generate the service controller")
+		return ErrRuntimeVersionNotFound
 	}
 	if optAWSSDKGoVersion == "" {
-		return fmt.Errorf("please specify the aws-sdk-go version to generate the service controller")
+		return ErrAWSSDKGoVersionNotFound
 	}
 	if optOutputPath == "" {
-		return fmt.Errorf("please specify the output path to generate the service controller")
+		return ErrOutputPathNotFound
 	}
 	if optTestInfraCommitSHA == "" {
-		return fmt.Errorf("please specify the aws-controllers-k8s/test-infra commit SHA to generate the service controller")
+		return ErrTestInfraCommitShaNotFound
 	}
 	return nil
 }

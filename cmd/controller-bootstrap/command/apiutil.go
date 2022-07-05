@@ -65,11 +65,11 @@ func getServiceResources() (*metaVars, error) {
 	h := newSDKHelper()
 	modelPath, err := h.findModelPath(serviceModelName)
 	if err != nil {
-		return nil, err
+		return nil, ErrServiceAPIFileNotFound
 	}
 	svcVars, err := h.modelAPI(modelPath)
 	if err != nil {
-		return nil, ErrServiceAPIFileNotFound
+		return nil, err
 	}
 	return svcVars, nil
 }

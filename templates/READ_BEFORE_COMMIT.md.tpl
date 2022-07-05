@@ -1,6 +1,6 @@
 # Instructions
 
-This document lays out the next steps for AWS service teams upon bootstrapping the ACK {{ .ServicePackageName }}-controller repository successfully.
+This document lays out the next steps for AWS service teams upon bootstrapping the ACK service controller repository successfully.
 
 1. To get started, edit `generator.yaml` file and comment out (with a `#`) each of the resource(s) from the ignore list, generating your controller after every edit.
 - This step will enable each resource within the service to be generated into an ACK custom resource definition. As you generate each of them, the code-generator may require additional configuration (in the `generator.yaml` file) in order for you to continue.
