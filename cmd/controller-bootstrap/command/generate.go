@@ -38,7 +38,7 @@ var (
 	ErrServiceAliasNotFound = errors.New(
 		"please specify the AWS service alias for the service controller to generate",
 	)
-	ErrRunTimeVersionNotFound = errors.New(
+	ErrRuntimeVersionNotFound = errors.New(
 		"please specify the aws-controllers-k8s/runtime version to generate the service controller",
 	)
 	ErrAWSSDKGoVersionNotFound = errors.New(
@@ -49,6 +49,12 @@ var (
 	)
 	ErrTestInfraCommitShaNotFound = errors.New(
 		"please specify the aws-controllers-k8s/test-infra commit SHA to generate the service controller",
+	)
+	ErrServiceControllerExists = errors.New(
+		"the service controller repository for the supplied AWS service alias already exists, please run the update command for an existing controller",
+	)
+	ErrServiceControllerNotFound = errors.New(
+		"the service controller repository for the supplied AWS service alias does not exist, please run the generate command for a new service controller",
 	)
 )
 
@@ -65,7 +71,7 @@ func generateController(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	if controllerExists() {
-		return fmt.Errorf("the service controller repository for the supplied AWS service alias already exists, please run the update command for an existing controller")
+		return ErrServiceControllerExists
 	}
 
 	ctx, cancel := contextWithSigterm(context.Background())
@@ -103,7 +109,7 @@ func validateArgs() error {
 		return ErrServiceAliasNotFound
 	}
 	if optRuntimeVersion == "" {
-		return ErrRunTimeVersionNotFound
+		return ErrRuntimeVersionNotFound
 	}
 	if optAWSSDKGoVersion == "" {
 		return ErrAWSSDKGoVersionNotFound

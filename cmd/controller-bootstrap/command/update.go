@@ -30,7 +30,6 @@ var projectDescriptionFiles = []string{
 	"GOVERNANCE.md.tpl",
 	"LICENSE.tpl",
 	"NOTICE.tpl",
-	"READ_BEFORE_COMMIT.md.tpl",
 	"SECURITY.md.tpl",
 }
 
@@ -50,7 +49,7 @@ func updateController(cmd *cobra.Command, args []string) error {
 		return ErrOutputPathNotFound
 	}
 	if !controllerExists() {
-		return fmt.Errorf("the service controller repository for the supplied AWS service alias does not exist, please run the generate command for a new service controller")
+		return ErrServiceControllerNotFound
 	}
 
 	// Loop over the template project description files and
