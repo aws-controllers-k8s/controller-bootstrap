@@ -14,27 +14,41 @@
 package command
 
 import (
-	"go/build"
+	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
 	"github.com/stretchr/testify/require"
 )
 
 var (
-	goPath               = build.Default.GOPATH
-	defaultRootDirectory = filepath.Join(goPath, "src/github.com/aws-controllers-k8s")
-	serviceAPIVersion    = "0000-00-00"
+	serviceAPIVersion = "0000-00-00"
 )
 
-// integration/ end-to-end test - this will run the command line
-// self-contain the unit test - make a copy of the api-2.json file - 2 assertions
+func findAPIsPath() (string, error) {
+	path, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	pathParts := strings.Split(path, "/")
+	for x, pathPart := range pathParts {
+		if pathPart == "cmd" {
+			path = filepath.Join(pathParts[0:x]...)
+			path = filepath.Join("/", path, "pkg", "testdata", "models", "apis")
+			break
+		}
+	}
+	return path, nil
+}
+
 func Test_modelAPI(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
-	apiPath := filepath.Join(defaultRootDirectory, "controller-bootstrap", "pkg", "testdata", "models", "apis")
+	apisPath, err := findAPIsPath()
+	require.NoError(err)
+
 	tests := []struct {
 		ServiceModelName    string
 		ServiceID           string
@@ -62,7 +76,7 @@ func Test_modelAPI(t *testing.T) {
 	}
 	h := newSDKHelper()
 	for _, test := range tests {
-		apiFile := filepath.Join(apiPath, test.ServiceModelName, serviceAPIVersion, "api-2.json")
+		apiFile := filepath.Join(apisPath, test.ServiceModelName, serviceAPIVersion, "api-2.json")
 		svcVars, err := h.modelAPI(apiFile)
 		require.NoError(err)
 		assert.Equal(test.ServiceID, svcVars.ServiceID)
