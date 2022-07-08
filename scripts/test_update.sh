@@ -14,8 +14,8 @@ CONTROLLER_DIR="$OUTPUT_DIR/$CONTROLLER_NAME"
 if ! grep -wq -- "this line is added by ACK update test" "$CONTROLLER_DIR/NOTICE"; then
     echo "Unable to find 'this line is added by ACK update test' in the 'NOTICE' file of $CONTROLLER_NAME. Adding 'this line is added by ACK update test' in controller-bootstrap/templates/NOTICE.tpl file ..."
     echo "this line is added by ACK update test" >> $NOTICE_TPL_FILE
-    echo "Updating the project description files in $CONTROLLER_NAME"
-    cd $CONTROLLER_BOOTSTRAP_DIR
+    echo "Updating the project description files in the existing $CONTROLLER_NAME"
+    cd "$CONTROLLER_BOOTSTRAP_DIR"
     make build
     ${CONTROLLER_BOOTSTRAP} update --aws-service-alias ${AWS_SERVICE} --output-path ${CONTROLLER_DIR}
 fi
