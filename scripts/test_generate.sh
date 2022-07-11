@@ -16,7 +16,7 @@ cd $CONTROLLER_BOOTSTRAP_DIR
 make generate
 
 if [[ ! -e "$CONTROLLER_DIR/TEST_FILE" ]]; then
-  echo "'TEST_FILE' is not found in $CONTROLLER_NAME. Creating a new template test file, controller-bootstrap/templates/TEST_FILE.tpl ..."
+  echo "test_generate.sh][INFO] 'TEST_FILE' is not found in $CONTROLLER_NAME. Creating a new template test file, controller-bootstrap/templates/TEST_FILE.tpl ..."
   cd "$CONTROLLER_BOOTSTRAP_TEMPLATES_DIR"
   touch "TEST_FILE.tpl"
   rm -rf ${CONTROLLER_DIR}
@@ -26,7 +26,7 @@ if [[ ! -e "$CONTROLLER_DIR/TEST_FILE" ]]; then
 fi
 
 if [[ ! -e "$CONTROLLER_DIR/TEST_FILE" ]]; then
-  echo "Unable to find 'TEST_FILE' in $CONTROLLER_NAME. Failed to generate the controller. Exiting"
+  echo "test_generate.sh][ERROR] Unable to find 'TEST_FILE' in $CONTROLLER_NAME. Failed to generate the controller. Exiting"
   exit 1
 else
   echo "Generated successfully and found 'TEST_FILE' in $CONTROLLER_NAME"
