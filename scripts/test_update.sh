@@ -12,13 +12,15 @@ OUTPUT_DIR="$CONTROLLER_BOOTSTRAP_DIR/test_output"
 CONTROLLER_DIR="$OUTPUT_DIR/$CONTROLLER_NAME"
 TEXT_TO_FIND="'this line is added by ACK update test'"
 
+export SERVICE
+export CONTROLLER_DIR
+
 if ! grep -wq -- "$TEXT_TO_FIND" "$CONTROLLER_DIR/NOTICE"; then
     echo "test_update.sh][DEBUG] Unable to find $TEXT_TO_FIND in the 'NOTICE' file of $CONTROLLER_NAME. Adding $TEXT_TO_FIND in controller-bootstrap/templates/NOTICE.tpl file ..."
     echo "$TEXT_TO_FIND" >> $NOTICE_TPL_FILE
     echo "Updating the project description files in the existing $CONTROLLER_NAME"
     cd "$CONTROLLER_BOOTSTRAP_DIR"
-    make build
-    ${CONTROLLER_BOOTSTRAP} update --aws-service-alias ${SERVICE} --output-path ${CONTROLLER_DIR}
+    make run
 fi
 
 if ! grep -wq -- "$TEXT_TO_FIND" "$CONTROLLER_DIR/NOTICE"; then
