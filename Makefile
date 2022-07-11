@@ -10,10 +10,10 @@ ifeq ($(SERVICE_MODEL_NAME),)
 endif
 
 ROOT_DIR=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
-CONTROLLER_DIR=${ROOT_DIR}/../${AWS_SERVICE}-controller
 CONTROLLER_BOOTSTRAP=./bin/controller-bootstrap
 CODE_GEN_DIR=${ROOT_DIR}/../code-generator
 
+CONTROLLER_DIR:=$(or $(CONTROLLER_DIR),${ROOT_DIR}/../${AWS_SERVICE}-controller)
 ACK_RUNTIME_VERSION:=$(or $(ACK_RUNTIME_VERSION),$(shell curl -s -H "Accept: application/vnd.github.v3+json" \
     https://api.github.com/repos/aws-controllers-k8s/runtime/releases/latest | jq -r '.tag_name'))
 AWS_SDK_GO_VERSION:=$(or $(AWS_SDK_GO_VERSION),$(shell curl -s -H "Accept: application/vnd.github.v3+json" \
@@ -44,7 +44,7 @@ build:
 
 generate: build
 	@${CONTROLLER_BOOTSTRAP} generate --aws-service-alias ${AWS_SERVICE} --ack-runtime-version ${ACK_RUNTIME_VERSION} \
-    --aws-sdk-go-version ${AWS_SDK_GO_VERSION} --dry-run=${DRY_RUN} --output-path ${ROOT_DIR}/../${AWS_SERVICE}-controller \
+    --aws-sdk-go-version ${AWS_SDK_GO_VERSION} --dry-run=${DRY_RUN} --output-path ${CONTROLLER_DIR} \
     --model-name ${SERVICE_MODEL_NAME} --refresh-cache=${REFRESH_CACHE} --test-infra-commit-sha ${TEST_INFRA_COMMIT_SHA}
 
 init: generate
@@ -59,7 +59,7 @@ init: generate
 run:
 	@if [ -f ${CONTROLLER_DIR}/cmd/controller/main.go ]; then \
         make build; \
-        ${CONTROLLER_BOOTSTRAP} update --aws-service-alias ${AWS_SERVICE} --output-path ${ROOT_DIR}/../${AWS_SERVICE}-controller; \
+        ${CONTROLLER_BOOTSTRAP} update --aws-service-alias ${AWS_SERVICE} --output-path ${CONTROLLER_DIR}; \
 	else \
 	    make init; \
 	fi
