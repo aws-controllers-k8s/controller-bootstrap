@@ -64,5 +64,8 @@ run:
 	    make init; \
 	fi
 
+test: 				## Run code tests
+	go test ${GO_CMD_FLAGS} ./...
+
 clean:
 	@rm -rf ${CONTROLLER_DIR}/..?* ${CONTROLLER_DIR}/.[!.]* ${CONTROLLER_DIR}/*
