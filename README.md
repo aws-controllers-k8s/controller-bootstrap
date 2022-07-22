@@ -6,15 +6,15 @@ which include: `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `GOVERNANCE.md`, `LICENS
 
 ## Getting Started
 
-First, fork the `aws-controllers-k8s/controller-bootstrap` repository and run the following script in the controller-bootstrap, which conditionally 
-bootstraps a new ACK service controller repository for on-boarding AWS service team or updates an existing ACK service controller repository with the latest templates of the project description files.
-
+First, fork the `aws-controllers-k8s/controller-bootstrap` repository and run the following script in the controller-bootstrap.
 ```
 export SERVICE=${AWS_SERVICE_NAME}
 make
 ```
+For a new ACK service controller, the `make` command bootstraps an ACK service controller repository. For an existing ACK service controller, it updates the service controller repository with the latest templates of the project description files.
 
-To generate the common directories and files for a new ACK service controller repository using CLI command, the user can run the `generate` command from the controller-bootstrap.
+
+To generate the common directories and files for a new ACK service controller using CLI command, the user can run the `generate` command from the controller-bootstrap.
 ```
 controller-bootstrap generate --aws-service-alias ${AWS_SERVICE} --ack-runtime-version ${ACK_RUNTIME_VERSION}
     --aws-sdk-go-version ${AWS_SDK_GO_VERSION} --dry-run=${DRY_RUN} --output-path ${CONTROLLER_DIR}
@@ -26,7 +26,7 @@ To update an existing ACK service controller with the latest templates of the pr
 controller-bootstrap update --aws-service-alias ${AWS_SERVICE} --output-path ${CONTROLLER_DIR}
 ```
 
-The command line arguments of the controller-bootstrap `generate` and `update` commands are described in the [Usage](#usage).
+The command-line arguments of the controller-bootstrap `generate` and `update` commands are described in the [Usage](#usage).
 
 ## Usage
 ```
