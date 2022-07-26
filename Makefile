@@ -60,6 +60,7 @@ run:
 	@if [ -f ${CONTROLLER_DIR}/cmd/controller/main.go ]; then \
         make build; \
         ${CONTROLLER_BOOTSTRAP} update --aws-service-alias ${AWS_SERVICE} --output-path ${CONTROLLER_DIR}; \
+        echo "${AWS_SERVICE}-controller updated successfully with the latest templates of project description files"; \
 	else \
 	    make init; \
 	fi
