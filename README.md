@@ -6,7 +6,7 @@ which include: `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `GOVERNANCE.md`, `LICENS
 
 ## Getting Started
 
-First, fork the `aws-controllers-k8s/controller-bootstrap` repository and run the following script in the controller-bootstrap.
+First, clone the `aws-controllers-k8s/controller-bootstrap` repository and run the following script in the controller-bootstrap.
 ```
 export SERVICE=${AWS_SERVICE_NAME}
 make
