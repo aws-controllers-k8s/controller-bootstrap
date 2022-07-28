@@ -40,7 +40,7 @@ type metaVars struct {
 // TODO: move SDKHelper struct and its corresponding methods to aws-controllers-k8s/pkg repository
 type SDKHelper struct {
 	loader *awssdkmodel.Loader
-	// Default is set by `FirstAPIVersion`
+	// Default is set by `latestAPIVersion`
 	apiVersion string
 }
 
@@ -89,7 +89,7 @@ func (h *SDKHelper) findModelPath(
 	serviceModelName string,
 ) (string, error) {
 	if h.apiVersion == "" {
-		apiVersion, err := h.firstAPIVersion(serviceModelName)
+		apiVersion, err := h.latestAPIVersion(serviceModelName)
 		if err != nil {
 			return "", err
 		}
@@ -102,15 +102,15 @@ func (h *SDKHelper) findModelPath(
 	return modelPath, nil
 }
 
-// firstAPIVersion returns the first found API version for a service API.
+// latestAPIVersion returns the latest found API version for a service API.
 // (e.h. "2012-10-03")
-func (h *SDKHelper) firstAPIVersion(serviceModelName string) (string, error) {
+func (h *SDKHelper) latestAPIVersion(serviceModelName string) (string, error) {
 	versions, err := h.getAPIVersions(serviceModelName)
 	if err != nil {
 		return "", err
 	}
 	sort.Strings(versions)
-	return versions[0], nil
+	return versions[len(versions)-1], nil
 }
 
 // getAPIVersions returns the list of API Versions found in a service directory.
