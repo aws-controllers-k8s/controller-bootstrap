@@ -31,4 +31,4 @@ maintainers:
   email: "ack-maintainers@amazon.com"
 links:
 - name: Amazon {{ .ServiceID }} Developer Resources
-  url: "{YOUR SERVICE DEVELOPER RESOURCES URL}"
+  url: https://aws.amazon.com/{{ .ServiceID }}/developer-resources/
