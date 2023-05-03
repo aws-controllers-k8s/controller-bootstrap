@@ -1,0 +1,5 @@
+[codespell]
+skip = .codespellrc,./.git
+check-filenames =
+check-hidden =
+quiet = 2
