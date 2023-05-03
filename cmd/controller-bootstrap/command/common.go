@@ -114,7 +114,7 @@ func ensureSDKRepo(
 		return err
 	}
 
-	// Clone repository if it doen't exist
+	// Clone repository if it doesn't exist
 	sdkDir = filepath.Join(srcPath, "aws-sdk-go")
 	if _, err := os.Stat(sdkDir); os.IsNotExist(err) {
 
@@ -122,7 +122,7 @@ func ensureSDKRepo(
 		defer cancel()
 		err = util.CloneRepository(ctx, sdkDir, sdkRepoURL)
 		if err != nil {
-			return fmt.Errorf("canot clone repository: %v", err)
+			return fmt.Errorf("cannot clone repository: %v", err)
 		}
 	}
 
