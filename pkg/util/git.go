@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"io"
 
-	"gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing"
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 )
 
 //TODO: move this file to aws-controllers-k8s/pkg repository after initial implementation of the controller-bootstrap
