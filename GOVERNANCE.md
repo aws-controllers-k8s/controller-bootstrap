@@ -5,7 +5,7 @@ The goal is to make sure that the roles and responsibilities are well defined an
 
 ## Communication
 
-The primary mechanism for communication will be via the `#provider-aws` channel on the Kubernetes Slack community.
+The primary mechanism for communication will be via the `#aws-controllers-k8s` channel on the Kubernetes Slack community.
 All features and bug fixes will be tracked as issues in GitHub. All decisions will be documented in GitHub issues.
 
 In the future, we may consider using a public mailing list, which can be better archived.
