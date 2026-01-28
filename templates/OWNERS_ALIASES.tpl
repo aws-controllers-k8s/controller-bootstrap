@@ -5,5 +5,4 @@ aliases:
     - a-hilaly
     - jlbutler
     - michaelhtm
-    - rushmash91
     - knottnt
