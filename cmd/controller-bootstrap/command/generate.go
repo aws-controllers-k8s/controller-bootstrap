@@ -76,7 +76,7 @@ func generateController(cmd *cobra.Command, args []string) error {
 
 	ctx, cancel := contextWithSigterm(context.Background())
 	defer cancel()
-	if err := ensureSDKRepo(ctx, defaultCacheACKDir, optRefreshCache); err != nil {
+	if err := ensureSDKRepo(ctx, defaultCacheACKDir, true); err != nil {
 		return err
 	}
 

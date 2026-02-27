@@ -14,10 +14,12 @@
 package util
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"io"
+	"os/exec"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -30,6 +32,12 @@ import (
 // migration or use something like https://github.com/spf13/afero
 func LoadRepository(path string) (*git.Repository, error) {
 	return git.PlainOpen(path)
+}
+
+// HasTag checks if a tag exists in the local repository.
+func HasTag(path string, tag string) bool {
+	cmd := exec.Command("git", "-C", path, "rev-parse", "--verify", fmt.Sprintf("refs/tags/%s", tag))
+	return cmd.Run() == nil
 }
 
 // CloneRepository clones a git repository into a given directory.
@@ -45,28 +53,16 @@ func CloneRepository(ctx context.Context, path, repositoryURL string) error {
 	return err
 }
 
-// FetchRepositoryTags fetches a repository remote tags.
+// FetchRepositoryTag fetches a single tag from the remote repository.
 //
-// Calling this function is equivalent to executing `git -C $path fetch --all --tags`
-func FetchRepositoryTags(ctx context.Context, path string) error {
-	// PlainOpen will make the git commands run against the local
-	// repository and directly make changes to it. So no need to
-	// save/rewrite the refs
-	repo, err := git.PlainOpen(path)
+// Equivalent to: git -C $path fetch origin tag $tag
+func FetchRepositoryTag(ctx context.Context, path string, tag string) error {
+	cmd := exec.CommandContext(ctx, "git", "-C", path, "fetch", "origin", "tag", tag)
+	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return err
+		return fmt.Errorf("%w: %s", err, string(out))
 	}
-
-	err = repo.FetchContext(ctx, &git.FetchOptions{
-		Progress: nil,
-		Tags:     git.AllTags,
-	})
-	// weirdly go-git returns a error "Already up to date" when all tags
-	// are already fetched. We should ignore this error.
-	if err == git.NoErrAlreadyUpToDate {
-		return nil
-	}
-	return err
+	return nil
 }
 
 // getRepositoryTagRef returns the git reference (commit hash) of a given tag.
@@ -98,18 +94,12 @@ func getRepositoryTagRef(repo *git.Repository, tagName string) (*plumbing.Refere
 // reference then calling the checkout function.
 //
 // Calling This function is equivalent to executing `git checkout tags/$tag`
-func CheckoutRepositoryTag(repo *git.Repository, tag string) error {
-	tagRef, err := getRepositoryTagRef(repo, tag)
-	if err != nil {
-		return err
+func CheckoutRepositoryTag(path string, tag string) error {
+	cmd := exec.Command("git", "-C", path, "checkout", fmt.Sprintf("tags/%s", tag), "-f")
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("%w: %s", err, stderr.String())
 	}
-	wt, err := repo.Worktree()
-	if err != nil {
-		return err
-	}
-	err = wt.Checkout(&git.CheckoutOptions{
-		// Checkout only take hashes or branch names.
-		Hash: tagRef.Hash(),
-	})
-	return err
+	return nil
 }

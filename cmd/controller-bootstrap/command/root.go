@@ -66,7 +66,7 @@ func init() {
 		&optRuntimeVersion, "ack-runtime-version", "", "Version of aws-controllers-k8s/runtime",
 	)
 	templateCmd.PersistentFlags().StringVar(
-		&optAWSSDKGoVersion, "aws-sdk-go-version", "", "Version of github.com/aws/aws-sdk-go used to infer service metadata and resources",
+		&optAWSSDKGoVersion, "aws-sdk-go-version", "", "Version of github.com/aws/aws-sdk-go-v2 used to infer service metadata and resources",
 	)
 	templateCmd.PersistentFlags().StringVar(
 		&optTestInfraCommitSHA, "test-infra-commit-sha", "", "Commit SHA of aws-controllers-k8s/test-infra",
