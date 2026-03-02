@@ -183,6 +183,8 @@ func serviceMetaVars(api *awssdkmodel.API) *metaVars {
 func getCRDNames(operations []string) []string {
 	var crdNames []string
 	pluralize := pluralize.NewClient()
+	sort.Strings(operations)
+
 	for _, opName := range operations {
 		if strings.HasPrefix(opName, "CreateBatch") {
 			continue
@@ -219,7 +221,11 @@ func loadAPI(modelPath string) (*metaVars, error) {
 				return nil, errors.New("service id not found")
 			}
 
+			serviceTitle, ok := shape.Traits["aws.api#title"].(string)
+
 			svcVars.ServiceID = serviceId.(string)
+			svcVars.ServiceFullName = serviceTitle
+			svcVars.ServiceAbbreviation = serviceTitle
 
 		case "operation":
 			name, err := removeShapeNamePrefix(shapeName)
@@ -234,15 +240,7 @@ func loadAPI(modelPath string) (*metaVars, error) {
 		}
 	}
 
-	crdNames := getCRDNames(operations)
-	svcVars.CRDNames = crdNames
-
-	// service := loadServiceMetadata(customAPI)
-	// operations := loadOperations(customAPI)
-
-	// metaVars{
-	// 	ServiceID: service.Traits,
-	// }
+	svcVars.CRDNames = getCRDNames(operations)
 
 	return &svcVars, nil
 }
