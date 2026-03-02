@@ -14,6 +14,7 @@
 package command
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -39,7 +40,8 @@ type metaVars struct {
 // API model loader
 // TODO: move SDKHelper struct and its corresponding methods to aws-controllers-k8s/pkg repository
 type SDKHelper struct {
-	loader *awssdkmodel.Loader
+	loader   *awssdkmodel.Loader
+	basePath string
 	// Default is set by `latestAPIVersion`
 	apiVersion string
 }
@@ -67,10 +69,12 @@ func getServiceResources() (*metaVars, error) {
 	if err != nil {
 		return nil, err
 	}
-	svcVars, err := h.modelAPI(modelPath)
+
+	svcVars, err := loadAPI(modelPath)
 	if err != nil {
 		return nil, err
 	}
+
 	return svcVars, nil
 }
 
@@ -143,6 +147,7 @@ func (h *SDKHelper) getAPIVersions(serviceModelName string) ([]string, error) {
 // modelAPI returns the populated metaVars struct with the service metadata
 // and custom resource names extracted from the aws-sdk-go model API object
 func (h *SDKHelper) modelAPI(modelPath string) (*metaVars, error) {
+
 	// loads the API model file(s) and returns the map of API package
 	apis, err := h.loader.Load([]string{modelPath})
 	if err != nil {
@@ -167,7 +172,7 @@ func serviceMetaVars(api *awssdkmodel.API) *metaVars {
 		ServiceModelName:    strings.ToLower(optModelName),
 		ServiceAbbreviation: api.Metadata.ServiceAbbreviation,
 		ServiceFullName:     api.Metadata.ServiceFullName,
-		CRDNames:            getCRDNames(api),
+		//CRDNames:            getCRDNames(api),
 	}
 }
 
@@ -175,10 +180,10 @@ func serviceMetaVars(api *awssdkmodel.API) *metaVars {
 // CustomResource names are created by dropping the prefix "Create" from
 // all the operation names that start with prefix "Create".
 // Operations with prefix "CreateBatch" are ignored.
-func getCRDNames(api *awssdkmodel.API) []string {
+func getCRDNames(operations []string) []string {
 	var crdNames []string
 	pluralize := pluralize.NewClient()
-	for _, opName := range api.OperationNames() {
+	for _, opName := range operations {
 		if strings.HasPrefix(opName, "CreateBatch") {
 			continue
 		}
@@ -191,6 +196,89 @@ func getCRDNames(api *awssdkmodel.API) []string {
 	}
 	return crdNames
 }
+
+func loadAPI(modelPath string) (*metaVars, error) {
+	file, err := os.ReadFile(modelPath)
+	if err != nil {
+		return nil, fmt.Errorf("error reading file: %v", err)
+	}
+
+	var customAPI API
+	err = json.Unmarshal(file, &customAPI)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshalling file: %v", err)
+	}
+
+	svcVars := metaVars{}
+	operations := make([]string, 0)
+	for shapeName, shape := range customAPI.Shapes {
+		switch shape.Type {
+		case "service":
+			serviceId, ok := shape.Traits["aws.api#service"].(map[string]interface{})["sdkId"]
+			if !ok {
+				return nil, errors.New("service id not found")
+			}
+
+			svcVars.ServiceID = serviceId.(string)
+
+		case "operation":
+			name, err := removeShapeNamePrefix(shapeName)
+			if err != nil {
+				return nil, err
+			}
+
+			operations = append(operations, name)
+
+		default:
+			continue
+		}
+	}
+
+	crdNames := getCRDNames(operations)
+	svcVars.CRDNames = crdNames
+
+	// service := loadServiceMetadata(customAPI)
+	// operations := loadOperations(customAPI)
+
+	// metaVars{
+	// 	ServiceID: service.Traits,
+	// }
+
+	return &svcVars, nil
+}
+
+func loadServiceMetadata(customAPI API) *Shape {
+	return nil
+}
+
+func loadOperations(customAPI API) []*string {
+	return nil
+}
+
+// removeShapeNamePrefix removes the prefix from the shapeName.
+// The prefix format of a shape in v2 is com.amazonaws.<serviceAlias>#shapeName
+func removeShapeNamePrefix(name string) (string, error) {
+	temp := strings.Split(name, "#")
+	if len(temp) != 2 {
+		return "", fmt.Errorf("%s shape name is not formatted correctly, expected format: <url>:<shapeName>", name)
+	}
+	newName := temp[1]
+
+	return newName, nil
+}
+
+// extractServiceAlias extracts the service alias from a shapeName
+// (see removeShapeNamePrefix)
+func extractServiceAlias(name string) string {
+	temp := strings.Split(name, ".")
+	anotherTemp := strings.Split(temp[len(temp)-1], "#")
+	if len(anotherTemp) != 2 {
+		return ""
+	}
+	alias := anotherTemp[0]
+	return alias
+}
+
 // ModelAndDocsPath returns two string paths to the supplied service's API and
 // doc JSON files
 func (h *SDKHelper) ModelAndDocsPath(serviceModelName string) (string, error) {
@@ -209,4 +297,30 @@ func (h *SDKHelper) ModelAndDocsPath(serviceModelName string) (string, error) {
 	} else {
 		return "", err
 	}
+}
+
+// API holds all the shapes defined in the <service>.json
+// api model file provided by aws-sdk-go-v2
+type API struct {
+	Shapes map[string]Shape `json:"shapes"`
+}
+
+// Shape contains the definition of a resource, field,
+// operation, service, etc.
+type Shape struct {
+	Type       string
+	Traits     map[string]interface{}
+	MemberRefs map[string]*ShapeRef `json:"members"`
+	MemberRef  *ShapeRef            `json:"member"`
+	KeyRef     ShapeRef             `json:"key"`
+	ValueRef   ShapeRef             `json:"value"`
+	InputRef   ShapeRef             `json:"input"`
+	OutputRef  ShapeRef             `json:"output"`
+	ErrorRefs  []ShapeRef           `json:"errors"`
+}
+
+// ShapeRef defines the usage of a shape within the API
+type ShapeRef struct {
+	ShapeName string `json:"target"`
+	Traits    map[string]interface{}
 }
