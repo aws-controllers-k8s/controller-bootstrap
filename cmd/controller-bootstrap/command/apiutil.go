@@ -63,9 +63,9 @@ func getServiceResources() (*metaVars, error) {
 		serviceModelName = strings.ToLower(optServiceAlias)
 	}
 	h := newSDKHelper()
-	modelPath, err := h.findModelPath(serviceModelName)
+	modelPath, err := h.ModelAndDocsPath(serviceModelName)
 	if err != nil {
-		return nil, ErrServiceAPIFileNotFound
+		return nil, err
 	}
 	svcVars, err := h.modelAPI(modelPath)
 	if err != nil {
@@ -81,6 +81,7 @@ func newSDKHelper() *SDKHelper {
 			BaseImport:            sdkDir,
 			IgnoreUnsupportedAPIs: true,
 		},
+		basePath: sdkDir,
 	}
 }
 
@@ -189,4 +190,23 @@ func getCRDNames(api *awssdkmodel.API) []string {
 		}
 	}
 	return crdNames
+}
+// ModelAndDocsPath returns two string paths to the supplied service's API and
+// doc JSON files
+func (h *SDKHelper) ModelAndDocsPath(serviceModelName string) (string, error) {
+	modelPath := filepath.Join(
+		h.basePath,
+		"codegen",
+		"sdk-codegen",
+		"aws-models",
+		fmt.Sprintf("%s.json", serviceModelName),
+	)
+
+	if _, err := os.Stat(modelPath); err == nil {
+		return modelPath, nil
+	} else if errors.Is(err, os.ErrNotExist) {
+		return "", ErrServiceAPIFileNotFound
+	} else {
+		return "", err
+	}
 }

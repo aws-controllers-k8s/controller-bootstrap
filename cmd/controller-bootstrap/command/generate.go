@@ -66,7 +66,7 @@ var templateCmd = &cobra.Command{
 
 // generateController creates the initial directories and files for a
 // new service controller repository by rendering go template files.
-func generateController(cmd *cobra.Command, args []string) error {
+func generateController(cmd *cobra.Command, args []string) (err error) {
 	if err := validateArgs(); err != nil {
 		return err
 	}
@@ -76,9 +76,12 @@ func generateController(cmd *cobra.Command, args []string) error {
 
 	ctx, cancel := contextWithSigterm(context.Background())
 	defer cancel()
-	if err := ensureSDKRepo(ctx, defaultCacheACKDir, true); err != nil {
+	var sdkDirPath string
+	if sdkDirPath, err = ensureSDKRepo(ctx, defaultCacheACKDir, true); err != nil {
 		return err
 	}
+
+	sdkDir = sdkDirPath
 
 	svcVars, err := getServiceResources()
 	if err != nil {

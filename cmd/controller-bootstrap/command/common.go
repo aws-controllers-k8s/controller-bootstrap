@@ -113,11 +113,11 @@ func ensureSDKRepo(
 	// A boolean instructing ensureSDKRepo whether to fetch the remote tags from
 	// the upstream repository
 	fetchTags bool,
-) error {
+) (string, error) {
 	var err error
 	srcPath := filepath.Join(cacheDir, "src")
 	if err = os.MkdirAll(srcPath, os.ModePerm); err != nil {
-		return err
+		return "", err
 	}
 
 	// Clone repository if it doesn't exist
@@ -133,7 +133,7 @@ func ensureSDKRepo(
 				err = fmt.Errorf("%w: take too long to clone aws sdk repo, "+
 					"please consider manually 'git clone %s' to cache dir %s", err, sdkRepoURL, sdkDir)
 			}
-			return fmt.Errorf("cannot clone repository: %v", err)
+			return "", fmt.Errorf("cannot clone repository: %v", err)
 		}
 		util.Tracef("git clone: %s\n", time.Since(cloneStart))
 	} else {
@@ -143,7 +143,7 @@ func ensureSDKRepo(
 	// Resolve the SDK version before fetching so we only fetch the tag we need
 	sdkVersion := getSDKVersion()
 	if err != nil {
-		return err
+		return "", err
 	}
 	sdkVersion = ensureSemverPrefix(sdkVersion)
 
@@ -154,7 +154,7 @@ func ensureSDKRepo(
 		defer cancel()
 		err = util.FetchRepositoryTag(ctx, sdkDir, sdkVersion)
 		if err != nil {
-			return fmt.Errorf("cannot fetch tag %s: %v", sdkVersion, err)
+			return "", fmt.Errorf("cannot fetch tag %s: %v", sdkVersion, err)
 		}
 		util.Tracef("git fetch tag %s: %s\n", sdkVersion, time.Since(fetchStart))
 	} else if fetchTags {
@@ -163,9 +163,9 @@ func ensureSDKRepo(
 
 	err = util.CheckoutRepositoryTag(sdkDir, sdkVersion)
 	if err != nil {
-		return fmt.Errorf("cannot checkout tag: %v", err)
+		return "", fmt.Errorf("cannot checkout tag: %v", err)
 	}
-	return nil
+	return sdkDir, nil
 }
 
 // ensureSemverPrefix takes a semver string and tries to append the 'v'
