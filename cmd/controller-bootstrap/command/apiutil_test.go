@@ -14,6 +14,7 @@
 package command
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -59,25 +60,25 @@ func Test_modelAPI(t *testing.T) {
 		{
 			ServiceModelName:    "eks",
 			ServiceID:           "EKS",
-			ServiceAbbreviation: "Amazon EKS",
+			ServiceAbbreviation: "Amazon Elastic Kubernetes Service",
 			ServiceFullName:     "Amazon Elastic Kubernetes Service",
-			CRDNames:            []string{"Addon", "Cluster", "FargateProfile", "Nodegroup"},
+			CRDNames:            []string{"AccessEntry", "Addon", "Cluster", "EksAnywhereSubscription", "FargateProfile", "Nodegroup", "PodIdentityAssociation"},
 		},
 		{
 			ServiceModelName:    "rds",
 			ServiceID:           "RDS",
-			ServiceAbbreviation: "Amazon RDS",
+			ServiceAbbreviation: "Amazon Relational Database Service",
 			ServiceFullName:     "Amazon Relational Database Service",
-			CRDNames: []string{"CustomAvailabilityZone", "DBCluster", "DBClusterEndpoint",
+			CRDNames: []string{"BlueGreenDeployment", "CustomDBEngineVersion", "DBCluster", "DBClusterEndpoint",
 				"DBClusterParameterGroup", "DBClusterSnapshot", "DBInstance", "DBInstanceReadReplica",
-				"DBParameterGroup", "DBProxy", "DBSecurityGroup", "DBSnapshot",
-				"DBSubnetGroup", "EventSubscription", "GlobalCluster", "OptionGroup"},
+				"DBParameterGroup", "DBProxy", "DBProxyEndpoint", "DBSecurityGroup", "DBShardGroup", "DBSnapshot",
+				"DBSubnetGroup", "EventSubscription", "GlobalCluster", "Integration", "OptionGroup", "TenantDatabase"},
 		},
 	}
-	h := newSDKHelper()
+
 	for _, test := range tests {
-		apiFile := filepath.Join(apisPath, test.ServiceModelName, serviceAPIVersion, "api-2.json")
-		svcVars, err := h.modelAPI(apiFile)
+		apiFile := filepath.Join(apisPath, test.ServiceModelName, serviceAPIVersion, fmt.Sprintf("%s.json", test.ServiceModelName))
+		svcVars, err := loadAPI(apiFile)
 		require.NoError(err)
 		assert.Equal(test.ServiceID, svcVars.ServiceID)
 		assert.Equal(test.ServiceAbbreviation, svcVars.ServiceAbbreviation)
