@@ -16,6 +16,7 @@ package command
 import (
 	"context"
 	"controller-bootstrap/pkg/util"
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -28,7 +29,7 @@ import (
 //TODO: move this file to aws-controllers-k8s/pkg repository after initial implementation of the controller-bootstrap
 
 const (
-	sdkRepoURL             = "https://github.com/aws/aws-sdk-go"
+	sdkRepoURL             = "https://github.com/aws/aws-sdk-go-v2"
 	defaultGitCloneTimeout = 180 * time.Second
 	defaultGitFetchTimeout = 30 * time.Second
 )
@@ -101,60 +102,70 @@ func isDirWriteable(fp string) bool {
 // this function, the sdkDir global variable will be set to the directory where
 // the aws-sdk-go is found. It will also optionally fetch all the remote tags
 // and checkout the given tag.
+// EnsureRepo ensures that we have a git clone'd copy of the aws-sdk-go
+// repository, which we use model JSON files from. Upon successful return of
+// this function, the sdkDir global variable will be set to the directory where
+// the aws-sdk-go is found. It will also optionally fetch all the remote tags
+// and checkout the given tag.
 func ensureSDKRepo(
 	ctx context.Context,
 	cacheDir string,
 	// A boolean instructing ensureSDKRepo whether to fetch the remote tags from
 	// the upstream repository
 	fetchTags bool,
-) error {
+) (string, error) {
 	var err error
 	srcPath := filepath.Join(cacheDir, "src")
 	if err = os.MkdirAll(srcPath, os.ModePerm); err != nil {
-		return err
+		return "", err
 	}
 
 	// Clone repository if it doesn't exist
-	sdkDir = filepath.Join(srcPath, "aws-sdk-go")
-	if _, err := os.Stat(sdkDir); os.IsNotExist(err) {
-
+	sdkDir := filepath.Join(srcPath, "aws-sdk-go-v2")
+	if _, err = os.Stat(sdkDir); os.IsNotExist(err) {
+		cloneStart := time.Now()
 		ctx, cancel := context.WithTimeout(ctx, defaultGitCloneTimeout)
 		defer cancel()
 		err = util.CloneRepository(ctx, sdkDir, sdkRepoURL)
 		if err != nil {
-			return fmt.Errorf("cannot clone repository: %v", err)
+			// See https://github.com/aws-controllers-k8s/community/issues/1642
+			if errors.Is(err, context.DeadlineExceeded) {
+				err = fmt.Errorf("%w: take too long to clone aws sdk repo, "+
+					"please consider manually 'git clone %s' to cache dir %s", err, sdkRepoURL, sdkDir)
+			}
+			return "", fmt.Errorf("cannot clone repository: %v", err)
 		}
+		util.Tracef("git clone: %s\n", time.Since(cloneStart))
+	} else {
+		util.Tracef("git clone: skipped (cached)\n")
 	}
 
-	// Fetch all tags
-	if fetchTags {
-		ctx, cancel := context.WithTimeout(ctx, defaultGitFetchTimeout)
-		defer cancel()
-		err = util.FetchRepositoryTags(ctx, sdkDir)
-		if err != nil {
-			return fmt.Errorf("cannot fetch tags: %v", err)
-		}
-	}
-
-	// get sdkVersion and ensure its prefix
+	// Resolve the SDK version before fetching so we only fetch the tag we need
 	sdkVersion := getSDKVersion()
 	if err != nil {
-		return err
+		return "", err
 	}
 	sdkVersion = ensureSemverPrefix(sdkVersion)
 
-	repo, err := util.LoadRepository(sdkDir)
-	if err != nil {
-		return fmt.Errorf("cannot read local repository: %v", err)
+	// Fetch the tag only if it doesn't already exist locally
+	if fetchTags && !util.HasTag(sdkDir, sdkVersion) {
+		fetchStart := time.Now()
+		ctx, cancel := context.WithTimeout(ctx, defaultGitFetchTimeout)
+		defer cancel()
+		err = util.FetchRepositoryTag(ctx, sdkDir, sdkVersion)
+		if err != nil {
+			return "", fmt.Errorf("cannot fetch tag %s: %v", sdkVersion, err)
+		}
+		util.Tracef("git fetch tag %s: %s\n", sdkVersion, time.Since(fetchStart))
+	} else if fetchTags {
+		util.Tracef("git fetch: skipped (tag %s exists locally)\n", sdkVersion)
 	}
 
-	// Now checkout the local repository.
-	err = util.CheckoutRepositoryTag(repo, sdkVersion)
+	err = util.CheckoutRepositoryTag(sdkDir, sdkVersion)
 	if err != nil {
-		return fmt.Errorf("cannot checkout tag: %v", err)
+		return "", fmt.Errorf("cannot checkout tag: %v", err)
 	}
-
-	return err
+	return sdkDir, nil
 }
 
 // ensureSemverPrefix takes a semver string and tries to append the 'v'
@@ -165,7 +176,7 @@ func ensureSemverPrefix(s string) string {
 	return fmt.Sprintf("v%s", s)
 }
 
-// getSDKVersion returns the github.com/aws/aws-sdk-go version to use
+// getSDKVersion returns the github.com/aws/aws-sdk-go-v2 version to use
 // from the --aws-sdk-go-version flag.
 func getSDKVersion() string {
 	return optAWSSDKGoVersion

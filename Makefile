@@ -16,8 +16,7 @@ CODE_GEN_DIR=${ROOT_DIR}/../code-generator
 CONTROLLER_DIR:=$(or $(CONTROLLER_DIR),${ROOT_DIR}/../${AWS_SERVICE}-controller)
 ACK_RUNTIME_VERSION:=$(or $(ACK_RUNTIME_VERSION),$(shell curl -s -H "Accept: application/vnd.github.v3+json" \
     https://api.github.com/repos/aws-controllers-k8s/runtime/releases/latest | jq -r '.tag_name'))
-AWS_SDK_GO_VERSION:=$(or $(AWS_SDK_GO_VERSION),$(shell curl -s -H "Accept: application/vnd.github.v3+json" \
-    https://api.github.com/repos/aws/aws-sdk-go/releases/latest | jq -r '.tag_name'))
+AWS_SDK_GO_VERSION:=$(or $(AWS_SDK_GO_VERSION),$(shell go list -m -json github.com/aws/aws-sdk-go-v2@latest | jq -r '.Version'))
 TEST_INFRA_COMMIT_SHA:=$(or $(TEST_INFRA_COMMIT_SHA),$(shell curl -s -H "Accept: application/vnd.github.v3+json" \
     https://api.github.com/repos/aws-controllers-k8s/test-infra/commits | jq -r ".[0].sha"))
 
