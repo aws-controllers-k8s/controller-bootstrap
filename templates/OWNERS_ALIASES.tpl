@@ -6,3 +6,7 @@ aliases:
     - jlbutler
     - michaelhtm
     - knottnt
+
+  core-ack-reviewers:
+    - gustavodiaz7722
+

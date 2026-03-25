@@ -160,6 +160,7 @@ func loadAPI(modelPath string) (*metaVars, error) {
 			}
 
 			svcVars.ServiceID = serviceId.(string)
+			svcVars.ServicePackageName = optServiceAlias
 			svcVars.ServiceFullName = serviceTitle
 			svcVars.ServiceAbbreviation = serviceTitle
 
