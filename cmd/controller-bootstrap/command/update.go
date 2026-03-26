@@ -31,6 +31,8 @@ var projectDescriptionFiles = []string{
 	"LICENSE.tpl",
 	"NOTICE.tpl",
 	"SECURITY.md.tpl",
+	"OWNERS.tpl",
+	"OWNERS_ALIASES.tpl",
 }
 
 var updateCmd = &cobra.Command{
