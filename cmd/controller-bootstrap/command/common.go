@@ -97,6 +97,21 @@ func isDirWriteable(fp string) bool {
 	return true
 }
 
+// cloneSDKRepo clones the aws-sdk-go-v2 repository into the given directory.
+// It is used by the per-service branch in generateController to clone the repo
+// before calling ensureSDKRepoPerServiceTag.
+func cloneSDKRepo(ctx context.Context, sdkDir string) error {
+	err := util.CloneRepository(ctx, sdkDir, sdkRepoURL)
+	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			err = fmt.Errorf("%w: took too long to clone aws sdk repo, "+
+				"please consider manually 'git clone %s' to cache dir %s", err, sdkRepoURL, sdkDir)
+		}
+		return fmt.Errorf("cannot clone repository: %v", err)
+	}
+	return nil
+}
+
 // ensureSDKRepo ensures that we have a git clone'd copy of the aws-sdk-go
 // repository, which we use model JSON files from. Upon successful return of
 // this function, the sdkDir global variable will be set to the directory where
@@ -180,4 +195,37 @@ func ensureSemverPrefix(s string) string {
 // from the --aws-sdk-go-version flag.
 func getSDKVersion() string {
 	return optAWSSDKGoVersion
+}
+
+// ensureSDKRepoPerServiceTag fetches and checks out a per-service git tag
+// in the already-cloned aws-sdk-go-v2 repository. The per-service tag format
+// is service/{serviceAlias}/{serviceSDKVersion}.
+func ensureSDKRepoPerServiceTag(
+	ctx context.Context,
+	cacheDir string,
+	serviceAlias string,
+	serviceSDKVersion string,
+) (string, error) {
+	srcPath := filepath.Join(cacheDir, "src")
+	sdkDir := filepath.Join(srcPath, "aws-sdk-go-v2")
+
+	tag := fmt.Sprintf("service/%s/%s", serviceAlias, ensureSemverPrefix(serviceSDKVersion))
+
+	// Fetch the tag if not already present locally
+	if !util.HasTag(sdkDir, tag) {
+		fetchCtx, cancel := context.WithTimeout(ctx, defaultGitFetchTimeout)
+		defer cancel()
+		err := util.FetchRepositoryTag(fetchCtx, sdkDir, tag)
+		if err != nil {
+			return "", fmt.Errorf("cannot fetch per-service tag %s: %v", tag, err)
+		}
+	}
+
+	// Checkout the per-service tag
+	err := util.CheckoutRepositoryTag(sdkDir, tag)
+	if err != nil {
+		return "", fmt.Errorf("cannot checkout per-service tag %s: %v", tag, err)
+	}
+
+	return sdkDir, nil
 }
