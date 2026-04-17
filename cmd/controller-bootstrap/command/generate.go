@@ -29,9 +29,10 @@ import (
 
 type templateVars struct {
 	*metaVars
-	AWSSDKGoVersion    string
-	RuntimeVersion     string
-	TestInfraCommitSHA string
+	AWSSDKGoVersion      string
+	AWSServiceSDKVersion string
+	RuntimeVersion       string
+	TestInfraCommitSHA   string
 }
 
 var (
@@ -70,28 +71,57 @@ func generateController(cmd *cobra.Command, args []string) (err error) {
 	if err := validateArgs(); err != nil {
 		return err
 	}
+
 	if controllerExists() {
 		return ErrServiceControllerExists
 	}
 
 	ctx, cancel := contextWithSigterm(context.Background())
 	defer cancel()
-	var sdkDirPath string
-	if sdkDirPath, err = ensureSDKRepo(ctx, defaultCacheACKDir, true); err != nil {
-		return err
-	}
 
-	sdkDir = sdkDirPath
+	if optAWSServiceSDKVersion != "" {
+		// Per-service branch: clone SDK repo then checkout per-service tag directly
+		srcPath := filepath.Join(defaultCacheACKDir, "src")
+		if err = os.MkdirAll(srcPath, os.ModePerm); err != nil {
+			return err
+		}
+		repoDir := filepath.Join(srcPath, "aws-sdk-go-v2")
+		if _, statErr := os.Stat(repoDir); os.IsNotExist(statErr) {
+			cloneCtx, cloneCancel := context.WithTimeout(ctx, defaultGitCloneTimeout)
+			defer cloneCancel()
+			if cloneErr := cloneSDKRepo(cloneCtx, repoDir); cloneErr != nil {
+				return cloneErr
+			}
+		}
+
+		serviceModelName := strings.ToLower(optModelName)
+		if optModelName == "" {
+			serviceModelName = strings.ToLower(optServiceAlias)
+		}
+		sdkDirPath, psErr := ensureSDKRepoPerServiceTag(ctx, defaultCacheACKDir, serviceModelName, optAWSServiceSDKVersion)
+		if psErr != nil {
+			return psErr
+		}
+		sdkDir = sdkDirPath
+	} else {
+		// Core branch: use ensureSDKRepo with core tag (existing behavior)
+		var sdkDirPath string
+		if sdkDirPath, err = ensureSDKRepo(ctx, defaultCacheACKDir, true); err != nil {
+			return err
+		}
+		sdkDir = sdkDirPath
+	}
 
 	svcVars, err := getServiceResources()
 	if err != nil {
 		return err
 	}
 	tplVars := &templateVars{
-		metaVars:           svcVars,
-		AWSSDKGoVersion:    optAWSSDKGoVersion,
-		RuntimeVersion:     optRuntimeVersion,
-		TestInfraCommitSHA: optTestInfraCommitSHA,
+		metaVars:             svcVars,
+		AWSSDKGoVersion:      optAWSSDKGoVersion,
+		AWSServiceSDKVersion: optAWSServiceSDKVersion,
+		RuntimeVersion:       optRuntimeVersion,
+		TestInfraCommitSHA:   optTestInfraCommitSHA,
 	}
 
 	var tplPaths []string
@@ -114,8 +144,11 @@ func validateArgs() error {
 	if optRuntimeVersion == "" {
 		return ErrRuntimeVersionNotFound
 	}
-	if optAWSSDKGoVersion == "" {
-		return ErrAWSSDKGoVersionNotFound
+	if optAWSSDKGoVersion == "" && optAWSServiceSDKVersion == "" {
+		return fmt.Errorf("at least one of --aws-sdk-go-version or --aws-service-sdk-version is required")
+	}
+	if optAWSSDKGoVersion != "" && optAWSServiceSDKVersion != "" {
+		return fmt.Errorf("--aws-sdk-go-version and --aws-service-sdk-version are mutually exclusive; provide only one")
 	}
 	if optOutputPath == "" {
 		return ErrOutputPathNotFound
