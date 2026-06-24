@@ -98,6 +98,12 @@ func getServiceResources() (*metaVars, error) {
 		return nil, err
 	}
 
+	// Propagate the explicit --model-name override (if any) so the generated
+	// generator.yaml emits a model_name field. We use the raw flag value rather
+	// than the service-alias fallback: model_name only needs to be written when
+	// it actually differs from the alias.
+	svcVars.ServiceModelName = strings.ToLower(optModelName)
+
 	return svcVars, nil
 }
 

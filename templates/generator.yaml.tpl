@@ -4,5 +4,6 @@ ignore:
       - {{ $crdName }}
 {{- end }}
 {{- if not (eq .ServiceModelName "") }}
-model_name: {{ .ServiceModelName }}
+sdk_names:
+  model_name: {{ .ServiceModelName }}
 {{- end }}
