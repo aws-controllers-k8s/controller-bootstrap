@@ -87,7 +87,10 @@ func ensureDir(fp string) (bool, error) {
 // isDirWriteable returns true if the supplied directory path is writeable,
 // false otherwise
 func isDirWriteable(fp string) bool {
-	testPath := filepath.Join(fp, "test")
+	// Use a dotted, unlikely-to-collide probe name. A plain "test" name
+	// collides with the test/ directory present in ACK controller repos,
+	// causing os.Create to fail and falsely report the dir as unwriteable.
+	testPath := filepath.Join(fp, ".ack-write-test")
 	f, err := os.Create(testPath)
 	if err != nil {
 		return false
