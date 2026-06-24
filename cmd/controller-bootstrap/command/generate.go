@@ -94,10 +94,7 @@ func generateController(cmd *cobra.Command, args []string) (err error) {
 			}
 		}
 
-		serviceModelName := strings.ToLower(optModelName)
-		if optModelName == "" {
-			serviceModelName = strings.ToLower(optServiceAlias)
-		}
+		serviceModelName := strings.ToLower(optServiceAlias)
 		sdkDirPath, psErr := ensureSDKRepoPerServiceTag(ctx, defaultCacheACKDir, serviceModelName, optAWSServiceSDKVersion)
 		if psErr != nil {
 			return psErr
