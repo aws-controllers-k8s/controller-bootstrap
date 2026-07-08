@@ -27,17 +27,18 @@ const (
 )
 
 var (
-	optRuntimeVersion     string
-	optAWSSDKGoVersion    string
-	optTestInfraCommitSHA string
-	optModelName          string
-	optRefreshCache       bool
-	optServiceAlias       string
-	optDryRun             bool
-	optOutputPath         string
-	sdkDir                string
-	defaultCacheACKDir    string
-	defaultTemplatesDir   string
+	optRuntimeVersion       string
+	optAWSSDKGoVersion      string
+	optAWSServiceSDKVersion string
+	optTestInfraCommitSHA   string
+	optModelName            string
+	optRefreshCache         bool
+	optServiceAlias         string
+	optDryRun               bool
+	optOutputPath           string
+	sdkDir                  string
+	defaultCacheACKDir      string
+	defaultTemplatesDir     string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -74,6 +75,10 @@ func init() {
 	templateCmd.PersistentFlags().StringVar(
 		&optModelName, "model-name", "", "Optional: service model name of the corresponding service alias",
 	)
+	templateCmd.PersistentFlags().StringVar(
+		&optAWSServiceSDKVersion, "aws-service-sdk-version", "",
+		"Per-service SDK version for fetching model from per-service tag",
+	)
 	templateCmd.PersistentFlags().BoolVar(
 		&optRefreshCache, "refresh-cache", true, "Optional: if true, and aws-sdk-go repo is already cloned, will git pull the latest aws-sdk-go commit",
 	)
@@ -87,7 +92,6 @@ func init() {
 		&optOutputPath, "output-path", "", "Path to ACK service controller directory to bootstrap",
 	)
 	templateCmd.MarkPersistentFlagRequired("ack-runtime-version")
-	templateCmd.MarkPersistentFlagRequired("aws-sdk-go-version")
 	templateCmd.MarkPersistentFlagRequired("test-infra-commit-sha")
 	rootCmd.MarkPersistentFlagRequired("aws-service-alias")
 	rootCmd.MarkPersistentFlagRequired("output-path")
