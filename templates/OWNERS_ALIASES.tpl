@@ -6,16 +6,15 @@ aliases:
     - jlbutler
     - michaelhtm
     - knottnt
+    - gustavodiaz7722
+    - sapphirew
   # emeritus-core-ack-team:
   #   - rushmash91
+  #   - TiberiuGC
   #   - jaypipes
   #   - jljaco
   #   - mhausenblas
   #   - RedbackThomson
-  #   - TiberiuGC
   #   - vijtrip2
   #   - ivelichkovich
-
-  core-ack-reviewers:
-    - gustavodiaz7722
 
