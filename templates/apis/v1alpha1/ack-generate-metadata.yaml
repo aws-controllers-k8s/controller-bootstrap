@@ -1,0 +1,6 @@
+api_version: v1alpha1
+{{- if .AWSServiceSDKVersion }}
+aws_sdk_service_version: {{ .AWSServiceSDKVersion }}
+{{- else }}
+aws_sdk_go_version: {{ .AWSSDKGoVersion }}
+{{- end }}
